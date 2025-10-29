@@ -2,87 +2,83 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class Person
+public class Person : List<string>
+{
+    public void display()
+    {
+        foreach (var item in this)
+        {
+            Console.WriteLine(item);
+        }
+    }
+}
+
+public class Student
 {
     public string Name { get; set; }
     public int Age { get; set; }
+
+    // ✅ Override Equals to compare Name and Age
+    public override bool Equals(object obj)
+    {
+        if (obj == null || obj is not Student other)
+            return false;
+
+        return Name == other.Name && Age == other.Age;
+    }
+
+    // ✅ Always override GetHashCode when you override Equals
+   
+}
+
+public class StudentList : List<Student>
+{
+    public void ShowStudentList()
+    {
+        foreach (var item in this)
+        {
+            Console.WriteLine($"{item.Name},{item.Age}");
+        }
+    }
+
+    // ✅ Compare two lists element by element
+    public override bool Equals(object obj)
+    {
+        if (obj == null || obj is not StudentList other)
+        {
+            return false;
+        }
+
+        return this.SequenceEqual(other);
+    }
+
+   
 }
 
 public class Program
 {
     public static void Main()
     {
-        List<Person> people = new List<Person>
-        {
-            new Person { Name = "Naveed", Age = 22 },
-            new Person { Name = "kabeer", Age = 24 },
-            new Person { Name = "ishraq", Age = 243 },
-            new Person { Name = "mubeen", Age = 232 },
-            new Person { Name = "NDK", Age = 212 },
-            new Person { Name = "Naveed", Age = 222 },
-            new Person { Name = "kapoor", Age = 322 }
-        };
+        Person list = new Person();
+        list.Add("Naveed");
+        list.Add("Kabeer");
+        list.Add("ishraq");
+        list.Add("sartaj");
+        list.display();
 
-        Console.WriteLine("..........Method Syntax..........");
+        StudentList list2 = new StudentList();
+        list2.Add(new Student { Name = "Naveed", Age = 20 });
+        list2.Add(new Student { Name = "kabeer", Age = 22 });
+        list2.Add(new Student { Name = "Naveed", Age = 20 });
+        list2.ShowStudentList();
 
-        var query1 = people.Where(s => s.Age > 100).Select(s => s.Name);
-        var query2 = people.Where(s => s.Age > 100).Select(s => new { s.Name, s.Age });
+        StudentList list3 = new StudentList();
+        list3.Add(new Student { Name = "Naveed", Age = 20 });
+        
+        list3.Add(new Student { Name = "kabeer", Age = 22 });
+        list3.Add(new Student { Age = 20 });
+        list3.ShowStudentList();
 
-        Console.WriteLine("Query1:");
-        foreach (var x in query1)
-        {
-            Console.WriteLine($"Name: {x}");
-        }
-
-        Console.WriteLine("Query2:");
-        foreach (var x in query2)
-        {
-            Console.WriteLine($"Name: {x.Name}, Age: {x.Age}");
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("..........Query Syntax..........");
-
-        var query3 = from s in people
-                     where s.Age == 22
-                     select s.Name;
-
-        Console.WriteLine("Query3:");
-        foreach (var x in query3)
-        {
-            Console.WriteLine($"Name: {x}");
-        }
-
-        var query4 = from c in people
-                     where c.Name == "ishraq"
-                     select new { c.Name, c.Age };
-
-        Console.WriteLine("Query4:");
-        foreach (var x in query4)
-        {
-            Console.WriteLine($"Name: {x.Name}, Age: {x.Age}");
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("..........IQueryable and IEnumerable..........");
-
-        IQueryable<Person> methodSyntax = people.AsQueryable()
-                                                .Where(std => std.Name == "ishraq");
-
-        Console.WriteLine("IQueryable:");
-        foreach (var student in methodSyntax)
-        {
-            Console.WriteLine($"Name is: {student.Name}");
-        }
-
-        IEnumerable<string> methodSyntax1 = people
-                                            .Where(std => std.Name == "ishraq")
-                                            .Select(std => std.Name);
-
-        Console.WriteLine("IEnumerable<string>:");
-        foreach (var name in methodSyntax1)
-        {
-            Console.WriteLine($"Name is: {name}");
-        }
+        Console.WriteLine(list2.Equals(list3));
     }
 }
